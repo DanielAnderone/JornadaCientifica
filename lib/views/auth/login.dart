@@ -1,122 +1,166 @@
 import 'package:flutter/material.dart';
+import '../../routes.dart'; // usa AppRoutes.shell após login
 
-/// Paleta e tokens de design
-class _Design {
-  static const blue = Color(0xFF2563EB);        // primário
-  static const title = Color(0xFF0F172A);       // azul-acinzentado escuro
-  static const label = Color(0xFF334155);
-  static const inputFill = Color(0xFFF8FAFC);   // quase branco
-  static const divider = Color(0xFFE2E8F0);
-  static const cardRadius = 16.0;
-  static const maxLoginWidth = 340.0;
-}
-
-/// Página (layout responsivo)
-class AuthLandingPage extends StatelessWidget {
-  const AuthLandingPage({super.key});
+class AuthPage extends StatelessWidget {
+  const AuthPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: Colors.white,
-      body: LayoutBuilder(
-        builder: (context, c) {
-          final wide = c.maxWidth >= 960;
+      body: _ResponsiveShell(),
+    );
+  }
+}
 
-          // Mobile / estreito: só o card central
-          if (!wide) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: _LoginCard(),
+class _Tokens {
+  static const blue1 = Color(0xFF1E3A8A); // azul escuro
+  static const blue2 = Color(0xFF2563EB); // azul principal
+  static const textDark = Color(0xFF111827);
+  static const label = Color(0xFF6B7280);
+  static const inputFill = Color(0xFFF9FAFB);
+  static const divider = Color(0xFFE5E7EB);
+  static const radius = 12.0;
+}
+
+class _ResponsiveShell extends StatelessWidget {
+  const _ResponsiveShell();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        final wide = c.maxWidth >= 1024;
+
+        if (!wide) {
+          // mobile: só o formulário centralizado
+          return Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: const _RightForm(),
               ),
-            );
-          }
+            ),
+          );
+        }
 
-          // Desktop / largo: texto curto à esquerda + card à direita
-          return Row(
+        // desktop/tablet largo — margens brancas, cartão azul à esquerda e formulário à direita
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 120, vertical: 60),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Lado esquerdo minimalista (sem poluir)
+              // Esquerda: cartão azul CENTRALIZADO (não ocupa 50%)
               Expanded(
-                child: Container(
-                  color: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 72),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: const _LeftHeroCard(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 80),
+              // Direita: formulário CENTRALIZADO e com largura fixa
+              SizedBox(
+                width: 560,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 560),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Feedback de Aulas',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  color: _Design.title,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.2,
-                                ),
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            'Melhore o ensino com feedbacks claros e objetivos.',
-                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                  color: _Design.title,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.05,
-                                  letterSpacing: -0.8,
-                                ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            'Colete opiniões dos estudantes e acompanhe métricas\nde satisfação por aula e disciplina.',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: _Design.label.withOpacity(0.85),
-                                  height: 1.35,
-                                ),
-                          ),
-                          const SizedBox(height: 28),
-                          Container(
-                            width: 120, height: 4,
-                            decoration: BoxDecoration(
-                              color: _Design.blue.withOpacity(.18),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                        ],
-                      ),
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: const _RightForm(),
                     ),
                   ),
                 ),
               ),
-
-              // Lado direito (card com acabamento)
-              Container(
-                width: 520,
-                color: Colors.white,
-                alignment: Alignment.center,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                  child: _LoginCard(),
-                ),
-              ),
             ],
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Cartão azul com textos e botão centralizados
+class _LeftHeroCard extends StatelessWidget {
+  const _LeftHeroCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [_Tokens.blue1, _Tokens.blue2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 56, vertical: 48),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 520),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Pronto para melhorar as suas aulas?',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                      ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Colete feedbacks dos estudantes, avalie a qualidade das '
+                  'aulas e acompanhe métricas que ajudam a crescer como docente.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white.withOpacity(.92),
+                        height: 1.55,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  height: 56,
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white, width: 1.4),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    ),
+                    onPressed: () {
+                      // TODO: rota cadastro
+                    },
+                    child: const Text('Criar conta'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Card de Login — foco no acabamento visual
-class _LoginCard extends StatefulWidget {
-  const _LoginCard();
+class _RightForm extends StatefulWidget {
+  const _RightForm();
 
   @override
-  State<_LoginCard> createState() => _LoginCardState();
+  State<_RightForm> createState() => _RightFormState();
 }
 
-class _LoginCardState extends State<_LoginCard> {
+class _RightFormState extends State<_RightForm> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _pass = TextEditingController();
@@ -130,191 +174,232 @@ class _LoginCardState extends State<_LoginCard> {
     super.dispose();
   }
 
+  InputDecoration _input(String hint) {
+    OutlineInputBorder _b(Color c) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(_Tokens.radius),
+          borderSide: BorderSide(color: c, width: 1.2),
+        );
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(fontSize: 16),
+      filled: true,
+      fillColor: _Tokens.inputFill,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      enabledBorder: _b(_Tokens.divider),
+      focusedBorder: _b(_Tokens.blue2),
+    );
+  }
+
+  String? _emailValidator(String? v) {
+    if (v == null || v.isEmpty) return 'Informe o e-mail';
+    final ok = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(v);
+    if (!ok) return 'E-mail inválido';
+    return null;
+  }
+
+  String? _passValidator(String? v) {
+    if (v == null || v.isEmpty) return 'Informe a senha';
+    if (v.length < 6) return 'Senha inválida';
+    return null;
+  }
+
+  // LOGIN: valida e navega para o SHELL (sidebar + placeholder)
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
     setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 300)); // simulação
     if (!mounted) return;
     setState(() => _loading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login (demo)')),
+    // Vai para o shell vazio (sidebar + "Acesse um item no menu")
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.shell,
+      (route) => false,
     );
-    // TODO: Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    OutlineInputBorder _border(Color color) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: color, width: 1),
-        );
-
-    final inputDecorationBase = InputDecorationTheme(
-      isDense: true,
-      filled: true,
-      fillColor: _Design.inputFill,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      enabledBorder: _border(_Design.divider),
-      focusedBorder: _border(_Design.blue),
-      errorBorder: _border(Colors.red.shade300),
-      focusedErrorBorder: _border(Colors.red.shade400),
-    );
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: _Design.maxLoginWidth),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(_Design.cardRadius),
-          border: Border.all(color: const Color(0x11000000)),
-          boxShadow: [
-            // sombra elegante e profissional
-            BoxShadow(
-              color: Colors.black.withOpacity(.08),
-              blurRadius: 28,
-              spreadRadius: 2,
-              offset: const Offset(0, 18),
-            ),
-            BoxShadow(
-              color: _Design.blue.withOpacity(.06),
-              blurRadius: 12,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Theme(
-          data: theme.copyWith(inputDecorationTheme: inputDecorationBase),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 360), // largura dos campos/botão
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // “logo” do app
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Bem-vindo(a) de volta',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: _Design.title,
-                      letterSpacing: -.2,
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: _Tokens.blue2,
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.school, color: Colors.white),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Entre para aceder ao painel.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: _Design.label.withOpacity(.85),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-
-                  // Email
-                  _fieldLabel('Endereço de e-mail'),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _email,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'voce@empresa.co.mz',
-                      prefixIcon: Icon(Icons.mail_outline, size: 20),
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Informe o e-mail';
-                      final re = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                      if (!re.hasMatch(v.trim())) return 'E-mail inválido';
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Senha
-                  _fieldLabel('Senha'),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _pass,
-                    obscureText: _obscure,
-                    decoration: InputDecoration(
-                      hintText: 'Digite sua senha',
-                      prefixIcon: const Icon(Icons.lock_outline, size: 20),
-                      suffixIcon: IconButton(
-                        tooltip: _obscure ? 'Mostrar senha' : 'Ocultar senha',
-                        icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility, size: 20),
-                        onPressed: () => setState(() => _obscure = !_obscure),
-                      ),
-                    ),
-                    validator: (v) {
-                      if (v == null || v.isEmpty) return 'Informe a senha';
-                      if (v.length < 6) return 'Mínimo de 6 caracteres';
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Esqueci a senha alinhado à direita
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: _Design.blue,
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      onPressed: () {/* TODO: rota de recuperação */},
-                      child: const Text('Esqueci a senha', style: TextStyle(fontSize: 13)),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Botão Entrar (estados para Web/hover)
-                  SizedBox(
-                    height: 46,
-                    child: FilledButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.resolveWith((states) {
-                          if (states.contains(WidgetState.disabled)) {
-                            return _Design.blue.withOpacity(.5);
-                          }
-                          if (states.contains(WidgetState.hovered)) {
-                            return _Design.blue.withOpacity(.92);
-                          }
-                          return _Design.blue;
-                        }),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  const SizedBox(width: 12),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Feedback Aulas',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: _Tokens.textDark,
                         ),
-                        elevation: const WidgetStatePropertyAll(0),
                       ),
-                      onPressed: _loading ? null : _submit,
-                      child: _loading
-                          ? const SizedBox(
-                              width: 18, height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Text('Entrar'),
-                    ),
+                      Text(
+                        'Melhore com cada lição',
+                        style: TextStyle(fontSize: 13, color: _Tokens.label),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          ),
+
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch, // ocupa toda a largura do bloco
+                children: [
+                  // Label E-mail
+                  const Text(
+                    'E-mail',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: _Tokens.textDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 56,
+                    child: TextFormField(
+                      controller: _email,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.username, AutofillHints.email],
+                      decoration: _input('Digite seu e-mail'),
+                      validator: _emailValidator,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Label Senha
+                  const Text(
+                    'Senha',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: _Tokens.textDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 56,
+                    child: TextFormField(
+                      controller: _pass,
+                      obscureText: _obscure,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _loading ? null : _submit(),
+                      autofillHints: const [AutofillHints.password],
+                      decoration: _input('Digite sua senha').copyWith(
+                        suffixIcon: IconButton(
+                          tooltip: _obscure ? 'Mostrar senha' : 'Ocultar senha',
+                          icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                          onPressed: () => setState(() => _obscure = !_obscure),
+                        ),
+                      ),
+                      validator: _passValidator,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+
+                  // Botão
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [_Tokens.blue2, _Tokens.blue1],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(_Tokens.radius),
+                      ),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(_Tokens.radius),
+                          ),
+                        ),
+                        onPressed: _loading ? null : _submit,
+                        child: _loading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'ENTRAR',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 22),
+
+                  TextButton(
+                    onPressed: () {}, // TODO: recuperar senha
+                    style: TextButton.styleFrom(
+                      foregroundColor: _Tokens.label,
+                      textStyle: const TextStyle(fontSize: 14),
+                    ),
+                    child: const Text('Esqueceu senha?'),
+                  ),
+
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Não possui conta? ', style: TextStyle(color: _Tokens.label)),
+                      TextButton(
+                        onPressed: () {}, // TODO: cadastro
+                        child: const Text(
+                          'Crie uma agora!',
+                          style: TextStyle(
+                            color: _Tokens.blue2,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  Widget _fieldLabel(String text) => Text(
-        text,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: _Design.label,
-              fontWeight: FontWeight.w600,
-            ),
-      );
 }
