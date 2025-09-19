@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
-// PÁGINAS
+// PÁGINAS (use prefixos para evitar conflitos)
 import 'views/auth/login.dart';
-import 'views/dashbord/dashboard.dart';
-import 'views/aulas/aulas.dart';
-import 'views/feedbacks/feedbacks.dart'; // sua página de “relatório de feedbacks”
-
-// Sidebar visual (apenas o widget da barra)
 import 'views/sidebar/sidebar.dart';
+
+import 'views/dashbord/dashboard.dart' as dash;
+import 'views/aulas/aulas.dart' as aulas;
+import 'views/feedbacks/feedbacks.dart' as fb;
+import 'views/relatorios/relatorios_page.dart' as rel;
+import 'views/notificacoes/notificacoes_page.dart' as not;
+import 'views/reclamacoes/reclamacoes_page.dart' as rec;
 
 class AppRoutes {
   static const String login = '/login';
@@ -20,8 +22,17 @@ class AppRoutes {
   static const String aulas = '/aulas';
   static const String feedbacks = '/feedbacks';
 
-  /// detalhe (opcional), se você tiver uma página que exige argumentos
+  /// detalhe (passa argumentos via `RouteSettings.arguments`)
   static const String feedbackDetail = '/feedbacks/detail';
+
+  // Página de relatórios
+  static const String relatorios = '/relatorios';
+
+  // Página de Notificações dos feedbacks dos usuários
+  static const String notificacoes = '/notificacoes';
+
+  // Página de REclamações e feedbacks dos usuários
+  static const String reclamacoes = '/reclamacoes';
 }
 
 class AppRouter {
@@ -29,31 +40,44 @@ class AppRouter {
   static final Map<String, WidgetBuilder> routes = {
     AppRoutes.login: (_) => const AuthPage(),
 
-    // Shell vazio com mensagem “Acesse um item no menu”
+    // Shell vazio com mensagem
     AppRoutes.shell: (_) => const _SidebarShellPage(selectedIndex: -1),
 
-    // As telas reais dentro do shell
+    // Telas dentro do shell (note os prefixos e os `const` nos filhos)
     AppRoutes.dashboard: (_) => const _SidebarShellPage(
-          selectedIndex: 0,
-          child: DashboardPage(),
-        ),
-    AppRoutes.aulas: (_) => const _SidebarShellPage(
-          selectedIndex: 1,
-          child: AulasPage(),
-        ),
+        selectedIndex: 0,
+        child: dash.DashboardPage(),
+      ),
+    AppRoutes.aulas: (_) => _SidebarShellPage(
+        selectedIndex: 1,
+        child: aulas.AulasPage(),
+      ),
     AppRoutes.feedbacks: (_) => const _SidebarShellPage(
-          selectedIndex: 2,
-          child: FeedbacksReportPage(), // página geral de relatórios de feedbacks
-        ),
+        selectedIndex: 2,
+        child: fb.FeedbacksReportPage(),
+      ),
+    AppRoutes.relatorios: (_) => const _SidebarShellPage(
+      selectedIndex: 3,
+      child: rel.RelatoriosPage(),
+    ),
+    AppRoutes.notificacoes: (_) => const _SidebarShellPage(
+      selectedIndex: 4,
+      child: not.NotificacoesPage(),
+    ),
+    AppRoutes.reclamacoes: (_) => const _SidebarShellPage(
+      selectedIndex: 7,
+      child: rec.ReclamacoesPage(),
+    ),
   };
 
   /// Rotas que precisam de argumentos (ex.: detalhe de feedback)
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case AppRoutes.feedbackDetail:
-        final dynamic arg = settings.arguments; // passe seu modelo/ID pelo arguments
+        final args =
+            (settings.arguments as Map<String, dynamic>?) ?? <String, dynamic>{};
         return MaterialPageRoute(
-          builder: (_) => FeedbackDetailPage(feedback: arg),
+          builder: (_) => fb.FeedbackDetailPage(feedback: args),
           settings: settings,
         );
     }
@@ -62,7 +86,7 @@ class AppRouter {
 }
 
 /// Shell com sidebar à esquerda.
-/// - Se [child] for nulo ➜ mostra placeholder “Acesse um item no menu”.
+/// - Se [child] for nulo, mostra o placeholder “Acesse um item no menu”.
 class _SidebarShellPage extends StatelessWidget {
   final int selectedIndex; // -1 para nada selecionado
   final Widget? child;
@@ -74,8 +98,6 @@ class _SidebarShellPage extends StatelessWidget {
   });
 
   static const _bg = Color(0xFFF8FAFC);
-  static const _blue1 = Color(0xFF1E3A8A);
-  static const _blue2 = Color(0xFF2563EB);
 
   @override
   Widget build(BuildContext context) {
@@ -87,38 +109,46 @@ class _SidebarShellPage extends StatelessWidget {
             width: 200,
             child: AppSidebar(
               selectedIndex: selectedIndex,
-              onSelect: (i, label) {
-                // Navegação centralizada por índice
+              onSelect: (i, _) {
                 switch (i) {
                   case 0:
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.dashboard);
                     break;
                   case 1:
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.aulas);
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.aulas);
                     break;
                   case 2:
-                    Navigator.of(context).pushReplacementNamed(AppRoutes.feedbacks);
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.feedbacks);
+                    break;
+                  case 3:
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.relatorios);
+                    break;
+                  case 4:
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.notificacoes);
+                    break;
+                  case 7:
+                    Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.reclamacoes);
                     break;
                   case 8: // Sair
-                    Navigator.of(context).pushNamedAndRemoveUntil(AppRoutes.login, (r) => false);
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoutes.login,
+                      (r) => false,
+                    );
                     break;
                   default:
-                    // ainda não implementadas (Relatórios, Conta, etc.)
                     break;
                 }
               },
             ),
           ),
           Expanded(
-            child: Column(
-              children: [
-              
-                // Conteúdo ou placeholder
-                Expanded(
-                  child: child ?? const _EmptyState(),
-                ),
-              ],
-            ),
+            child: child ?? const _EmptyState(),
           ),
         ],
       ),
@@ -143,4 +173,3 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
-  
